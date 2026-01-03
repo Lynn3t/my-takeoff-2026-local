@@ -24,6 +24,69 @@ const CalendarSkeleton = memo(function CalendarSkeleton() {
   );
 });
 
+// 安装提示组件 - 根据设备类型显示不同内容
+type InstallPromptType = 'none' | 'android' | 'ios';
+
+const InstallPrompt = memo(function InstallPrompt() {
+  const [promptType, setPromptType] = useState<InstallPromptType>('none');
+
+  useEffect(() => {
+    const ua = navigator.userAgent.toLowerCase();
+    const isAndroid = /android/.test(ua);
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+    const isMobile = isAndroid || isIOS;
+
+    // 检测是否在 standalone 模式（已安装的 APK）
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+    // 电脑或已安装的应用：不显示
+    if (!isMobile || isStandalone) {
+      setPromptType('none');
+      return;
+    }
+
+    if (isAndroid) {
+      setPromptType('android');
+    } else if (isIOS) {
+      setPromptType('ios');
+    }
+  }, []);
+
+  if (promptType === 'none') return null;
+
+  if (promptType === 'android') {
+    return (
+      <a
+        href="/Takeoff2026.apk"
+        download="Takeoff2026.apk"
+        className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded-full transition-all"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        安装 App
+      </a>
+    );
+  }
+
+  if (promptType === 'ios') {
+    return (
+      <button
+        onClick={() => alert('点击底部分享按钮 → 选择"添加到主屏幕"')}
+        className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-full transition-all"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v12m0-12L8 8m4-4l4 4M6 20h12" />
+        </svg>
+        添加到主屏幕
+      </button>
+    );
+  }
+
+  return null;
+});
+
 // 日期单元格组件 - 使用 memo 避免不必要的重渲染
 interface DayCellProps {
   dateKey: string;
@@ -265,6 +328,11 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8 flex flex-col items-center">
+      {/* 顶部栏 - 安装提示 */}
+      <div className="w-full max-w-6xl flex justify-end items-center gap-4 mb-4 min-h-[24px]">
+        <InstallPrompt />
+      </div>
+
       <h1 className="text-2xl font-bold mb-4 text-gray-800">2026 起飞记录仪</h1>
 
       <div className="flex flex-wrap items-center justify-center gap-4 mb-8 bg-white p-3 rounded-xl shadow-sm px-6">
@@ -292,13 +360,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* 本地模式提示 */}
-      <div className="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm bg-blue-50 text-blue-700">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-        <span>本地版 - 数据保存在浏览器</span>
-      </div>
     </main>
   );
 }
