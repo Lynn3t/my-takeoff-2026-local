@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo, memo, useCallback } from 'react';
+import ReportModal from '@/app/components/ReportModal';
 
 // 骨架屏组件 - 日历月份
 const CalendarSkeleton = memo(function CalendarSkeleton() {
@@ -142,6 +143,7 @@ export default function Home() {
   const [dataMap, setDataMap] = useState<DataMap>({});
   const [loading, setLoading] = useState(true);
   const [todayKey, setTodayKey] = useState<string>('');
+  const [showReportModal, setShowReportModal] = useState(false);
   const year = 2026;
 
   const getTodayString = () => {
@@ -350,6 +352,15 @@ export default function Home() {
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
             导出 CSV
         </button>
+
+        {/* AI报告按钮 */}
+        <button
+            onClick={() => setShowReportModal(true)}
+            className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-xs rounded-full transition-all font-medium flex items-center gap-1 btn-press"
+        >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            AI 报告
+        </button>
       </div>
 
       {loading ? (
@@ -358,6 +369,14 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full max-w-6xl">
           {renderCalendar()}
         </div>
+      )}
+
+      {/* AI报告弹窗 */}
+      {showReportModal && (
+        <ReportModal
+          onClose={() => setShowReportModal(false)}
+          dataMap={dataMap}
+        />
       )}
 
     </main>
